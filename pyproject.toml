@@ -7,14 +7,15 @@ readme = "README.md"
 packages = [{include = "faq_chatbot"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 fastapi = "^0.115.6"
 uvicorn = "^0.32.1"
-openai = "^1.56.2"
-sentence-transformers = "^3.3.1"
-chromadb = "^0.5.23"
+openai = "^1.57.0"
 pandas = "^2.2.3"
-scikit-learn = "^1.5.2"
+jupyter = "^1.1.1"
+pymilvus = "^2.4.6"
+grpcio = ">=1.49.1,<=1.67.1"
+python-dotenv = "^1.0.1"
 
 
 [build-system]
