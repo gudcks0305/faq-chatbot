@@ -1,4 +1,5 @@
-from app.container.milvus_container import MilvusSearchClient
+from app.config.container import MilvusSearchClient
+
 
 # def define_collection_schema():
 #     fields = [
@@ -11,7 +12,9 @@ class FaqSearchRepository:
     def __init__(self, milvus_client: MilvusSearchClient):
         self.collection = milvus_client.client.load_collection("faq_collection")
 
-    def search_faq(self, vectors: list[list[float]], top_k: int, search_param: dict[str, str], output_fields: list[str], anns_field: str):
+    def search_faq(self, vectors: list[list[float]], top_k: int,
+        search_param: dict[str, str], output_fields: list[str],
+        anns_field: str):
         return self.collection.search(
             data=vectors,
             limit=top_k,
@@ -19,4 +22,3 @@ class FaqSearchRepository:
             output_fields=output_fields,
             anns_field=anns_field
         )
-

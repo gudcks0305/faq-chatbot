@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from app.container.milvus_container import MilvusSearchClient
+from app.config.container.milvus_container import MilvusSearchClient
 from app.domain.faq.repository.faq_search_repository import FaqSearchRepository
 
 @lru_cache
