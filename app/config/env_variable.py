@@ -14,7 +14,8 @@ def get_dotenv_paths() -> list[Path]:
 
 class Settings(BaseSettings):
     OPEN_API_KEY: str
-
+    MILVUS_HOST: str
+    MILVUS_PORT: int
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
