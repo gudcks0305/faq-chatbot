@@ -1,5 +1,5 @@
 import json
-from typing import Generator, AsyncGenerator
+from typing import AsyncGenerator, Generator
 
 from openai import OpenAI, Stream
 from openai.types.chat import ChatCompletionChunk
@@ -31,36 +31,41 @@ class OpenAIClient:
         return OpenAI(api_key=self.api_key)
 
     def get_text_embedding_ada2_vectors(self, text: str) -> list[float]:
-        return self.get_client().embeddings.create(
-            model="text-embedding-ada-002",
-            input=text
-        ).data[0].embedding
-
-    def request_chat_completion(self, model: str = "gpt-4o-mini",
-        question: str = "") -> str:
-        return self.get_client().chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "user", "content": question}
-            ],
-            temperature=0
+        return (
+            self.get_client()
+            .embeddings.create(model="text-embedding-ada-002", input=text)
+            .data[0]
+            .embedding
         )
 
-    def request_chat_completion_stream(self, model: str = "gpt-4o-mini",
-        question: str = "") -> Stream[ChatCompletionChunk]:
-        return self.get_client().chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "user", "content": question}
-            ],
-            stream=True,
-            temperature=0
+    def get_text_text_embedding_small_vectors(self, text: str) -> list[float]:
+        return (
+            self.get_client()
+            .embeddings.create(model="text-embedding-3-small", input=text)
+            .data[0]
+            .embedding
         )
 
-    def request_chat_completions_stream(self, model: str = "gpt-4o-mini",messages: list[dict[str, str]]=[]) -> Stream[ChatCompletionChunk]:
+    def request_chat_completion(
+        self, model: str = "gpt-4o-mini", question: str = ""
+    ) -> str:
+        return self.get_client().chat.completions.create(
+            model=model, messages=[{"role": "user", "content": question}], temperature=0
+        )
+
+    def request_chat_completion_stream(
+        self, model: str = "gpt-4o-mini", question: str = ""
+    ) -> Stream[ChatCompletionChunk]:
         return self.get_client().chat.completions.create(
             model=model,
-            messages=messages,
+            messages=[{"role": "user", "content": question}],
             stream=True,
-            temperature=0
+            temperature=0,
+        )
+
+    def request_chat_completions_stream(
+        self, model: str = "gpt-4o-mini", messages: list[dict[str, str]] = []
+    ) -> Stream[ChatCompletionChunk]:
+        return self.get_client().chat.completions.create(
+            model=model, messages=messages, stream=True, temperature=0
         )

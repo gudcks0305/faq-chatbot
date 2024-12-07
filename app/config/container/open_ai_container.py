@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from app.config.env_variable import get_settings
 from app.domain.llm.open_ai_client import OpenAIClient
 
