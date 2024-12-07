@@ -1,4 +1,6 @@
-from app.config.container import MilvusSearchClient
+from typing import Any
+
+from app.config.container.milvus_container import MilvusSearchClient
 
 
 # def define_collection_schema():
@@ -10,12 +12,14 @@ from app.config.container import MilvusSearchClient
 #     return CollectionSchema(fields, description="FAQ collection")
 class FaqSearchRepository:
     def __init__(self, milvus_client: MilvusSearchClient):
-        self.collection = milvus_client.client.load_collection("faq_collection")
-
+        self.collection_name = "faq_collection"
+        self.milvus_client = milvus_client
+        milvus_client.client.load_collection(self.collection_name)
     def search_faq(self, vectors: list[list[float]], top_k: int,
         search_param: dict[str, str], output_fields: list[str],
         anns_field: str):
-        return self.collection.search(
+        return  self.milvus_client.client.search(
+            collection_name=self.collection_name,
             data=vectors,
             limit=top_k,
             param=search_param,
