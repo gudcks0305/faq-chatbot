@@ -12,6 +12,20 @@ class FaqService:
         self.openai_client = openai_client
 
     def chat_request(self, question: str):
+        made_prompt = self.make_rag_request(question)
+        response_chat_completion = self.openai_client.request_chat_completion(
+            question=made_prompt)
+
+        return response_chat_completion
+
+    def chat_request_stream(self, question: str):
+        made_prompt = self.make_rag_request(question)
+        response_chat_completion = self.openai_client.request_chat_completion_stream(
+            question=made_prompt)
+
+        return response_chat_completion
+
+    def make_rag_request(self, question):
         question_text_embedding = self.openai_client.get_text_embedding_ada2_vectors(
             question)
         ranked_faq_list: list[Hits] = self.faq_repository.search_faq(
@@ -24,7 +38,4 @@ class FaqService:
             search_data=faqs
         )
         print(made_prompt)
-        response_chat_completion = self.openai_client.request_chat_completion(
-            question=made_prompt)
-
-        return response_chat_completion
+        return made_prompt
