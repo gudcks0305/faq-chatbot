@@ -21,5 +21,5 @@ async def post_question_stream(
     question_request: QuestionRequest,
     fqa_service: FaqService  = Depends(get_faq_service)
 ):
-    chunk = chat_stream_generator(fqa_service.chat_request_stream(question_request.question))
-    return StreamingResponse(chunk, media_type="text/event-stream")
+    stream = fqa_service.chat_request_stream(question_request.question)
+    return StreamingResponse(stream, media_type="text/event-stream")

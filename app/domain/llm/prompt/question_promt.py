@@ -27,6 +27,8 @@ question_prompt = """
 ### 예제 입력과 처리
 
 **입력 형식:**
+
+- 이전 질문: [사용자의 이전 질문 내용]
 - 질문: [사용자가 묻는 질문]
 - 검색 증강 데이터: [관련된 검색 데이터를 JSON 또는 텍스트 형식으로 제공]
 
@@ -34,6 +36,8 @@ question_prompt = """
 - 답변: [사용자의 질문에 대한 최종 답변. 검색 데이터를 기반으로 상세히 서술.]
 
 === 내용 ===
+[이전 질문]:
+{question_history}
 
 [질문]: 
 {question}
@@ -44,5 +48,8 @@ question_prompt = """
 """
 
 
-def get_question_prompt(question: str, search_data: str) -> str:
-    return question_prompt.format(question=question, search_data=search_data)
+def get_question_prompt(question: str,
+    question_history: list[str],
+    search_data: str) -> str:
+    return question_prompt.format(question=question, search_data=search_data,
+                                  question_history=question_history)
