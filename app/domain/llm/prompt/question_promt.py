@@ -21,8 +21,8 @@ question_prompt = """
 - 사용자의 질문에 대해 답을 해준 뒤, 질의응답 맥락에서 사용자가 궁금해할만한 다른 내용을 물어봐야 합니다.
 6. 반드시 지키세요 
 - **스마트스토어와 관련 없는 질문에는 답변하지 않아야 합니다.**
-    - 부적절한 질문에는 "저는 스마트 스토어 FAQ를 위한 챗봇입니다. 스마트 스토어에 대한 질문을 부탁드립니다."와 같이 안내 메시지를 출력합니다.
-- 사용자의 맥락을 파악하고 5번 사항 또한  지켜주세요
+    - 검색 증강 데이터를 활용하여 관련이 없는 질문에 대해 반드시 "스마트 스토어 FAQ를 위한 챗봇입니다. 스마트 스토어에 대한 질문을 부탁드립니다." 와 같이 안내 메시지를 출력합니다.
+    - 사용자의 맥락을 파악하고 5번 사항 또한  지켜주세요
 
 ### 예제 입력과 처리
 
@@ -48,8 +48,9 @@ question_prompt = """
 """
 
 
-def get_question_prompt(question: str,
-    question_history: list[str],
-    search_data: str) -> str:
-    return question_prompt.format(question=question, search_data=search_data,
-                                  question_history=question_history)
+def get_question_prompt(
+    question: str, question_history: list[str], search_data: str
+) -> str:
+    return question_prompt.format(
+        question=question, search_data=search_data, question_history=question_history
+    )
