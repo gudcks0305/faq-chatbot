@@ -15,6 +15,9 @@ class MilvusSearchClient:
         self.client = Milvus(MILVUS_HOST, MILVUS_PORT)
         self.default_search_param = {"metric_type": "IP", "params": {"nprobe": 10}}
 
+    def get_client(self):
+        return self.client
+
     def search_vectors(
         self,
         collection_name: str,

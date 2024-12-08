@@ -2,10 +2,8 @@ from nest.core import Injectable
 from pymilvus import Hits
 
 from src.domain.faq.faq_search_repository import FaqSearchRepository
-from src.domain.faq.question_history_repository import \
-    QuestionHistoryRepository
-from src.domain.llm.open_ai_client import (OpenAIClient,
-                                           chat_stream_generator)
+from src.domain.faq.question_history_repository import QuestionHistoryRepository
+from src.domain.llm.open_ai_client import OpenAIClient, chat_stream_generator
 from src.domain.llm.prompt.question_promt import get_question_prompt
 
 
@@ -22,79 +20,63 @@ class FaqService:
         self.question_history_repository = question_history_repository
 
     def chat_request(self, question: str):
-        made_prompt,_ = self.make_rag_request_and_text_embedding(question)
-        response_chat_completion = self.openai_client.request_chat_completion(
-            question=made_prompt
-        )
-
-        return response_chat_completion
+        made_prompt, _ = self._prepare_prompt_and_embedding(question)
+        return self.openai_client.request_chat_completion(question=made_prompt)
 
     def chat_request_stream(self, question: str):
-        made_prompt, question_text_embedding = self.make_rag_request_and_text_embedding(
-            question
-        )
-        response_chat_completion = self.openai_client.request_chat_completion_stream(
-            question=made_prompt
-        )
+        made_prompt, question_text_embedding = self._prepare_prompt_and_embedding(question)
+        response_stream = self.openai_client.request_chat_completion_stream(question=made_prompt)
 
-        stream = chat_stream_generator(response_chat_completion)
         stream_data = []
-
-        for chunk in stream:
+        for chunk in chat_stream_generator(response_stream):
             stream_data.append(chunk)
-            yield chunk  # 스트림 데이터를 실시간으로 반환
-        self.question_history_repository.add_history(
-            user_id="test",
-            vector=question_text_embedding,
-            question=question,
-            role="user",
-        )
-        full_response = "".join(stream_data)
-        self.question_history_repository.add_history(
-            user_id="test",
-            vector=[],  # 필요시 다른 데이터 추가
-            question=full_response,
-            role="assistant",
-        )
+            yield chunk  # Yield stream data in real-time
 
-        return stream
+        self._update_question_history("test", question_text_embedding, question, "".join(stream_data))
 
-    def make_rag_request_and_text_embedding(self, question) -> tuple[str, list[float]]:
-        question_text_embedding = (
-            self.openai_client.get_text_text_embedding_small_vectors(question)
-        )
-        ranked_faq_list: list[Hits] = self.faq_repository.search_faq(
+    def _prepare_prompt_and_embedding(self, question: str) -> tuple[str, list[float]]:
+        question_text_embedding = self.openai_client.get_text_text_embedding_small_vectors(question)
+        ranked_faq_list = self.faq_repository.search_faq(
             [question_text_embedding],
             top_k=3,
             search_param={},
             output_fields=["faq_index", "answer"],
             anns_field="embedding",
         )
-        # group by faq_index
-        print(ranked_faq_list)
+
+        grouped_faq_list = self._group_faqs_by_index(ranked_faq_list)
+        faqs = "\n".join(str(answer) for answer in self._extract_answers(grouped_faq_list))
+
+        made_prompt = get_question_prompt(
+            question=question,
+            question_history=[],  # Placeholder for question history
+            search_data=faqs,
+        )
+        return made_prompt, question_text_embedding
+
+    def _group_faqs_by_index(self, ranked_faq_list: list[Hits]) -> dict:
         grouped_faq_list = {}
         for faq in ranked_faq_list[0]:
             faq_index = faq.entity.faq_index
-            if faq_index not in grouped_faq_list:
-                grouped_faq_list[faq_index] = []
-            grouped_faq_list[faq_index].append(faq)
+            grouped_faq_list.setdefault(faq_index, []).append(faq)
+        return grouped_faq_list
 
-        answer_list: list = []
-        for faq_index, faqs in grouped_faq_list.items():
-            faq = faqs[0].entity
-            answer_list.append(
-                {
-                    "faq_index": faq_index,
-                    "answer": faq.answer,
-                }
-            )
-        faqs = "\n".join(str(answer) for answer in answer_list)
-        # question_history = self.question_history_repository.get_history(user_id="test")
-        made_prompt: str = get_question_prompt(
+    def _extract_answers(self, grouped_faq_list: dict) -> list[dict]:
+        return [
+            {"faq_index": faq_index, "answer": faqs[0].entity.answer}
+            for faq_index, faqs in grouped_faq_list.items()
+        ]
+
+    def _update_question_history(self, user_id: str, question_vector: list[float], question: str, response: str):
+        self.question_history_repository.add_history(
+            user_id=user_id,
+            vector=question_vector,
             question=question,
-            # question_history=[q.question.join("---------------------") for q in question_history],
-            question_history=[],
-            search_data=faqs,
+            role="user",
         )
-        print(made_prompt)
-        return made_prompt, question_text_embedding
+        self.question_history_repository.add_history(
+            user_id=user_id,
+            vector=[],  # Add other data if necessary
+            question=response,
+            role="assistant",
+        )

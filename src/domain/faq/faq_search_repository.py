@@ -25,7 +25,7 @@ class FaqSearchRepository:
         output_fields: list[str],
         anns_field: str,
     ):
-        return self.milvus_client.client.search(
+        return self.milvus_client.get_client().search(
             collection_name=self.collection_name,
             data=vectors,
             limit=top_k,
