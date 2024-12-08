@@ -55,11 +55,13 @@ QUESTION_PROMPT = """
 
 
 def generate_question_prompt(
-    question: str,search_data: str, question_history_llm_message: list[dict]
+    question: str, search_data: str, question_history_llm_message: list[dict]
 ) -> str:
     return QUESTION_PROMPT.format(
-        question=question, search_data=search_data,
+        question=question,
+        search_data=search_data,
         question_history_llm_message="\n".join(
-            f"{index + 1}. {message['content']}" for index, message in enumerate(question_history_llm_message)
-        )
+            f"{index + 1}. {message['content']}"
+            for index, message in enumerate(question_history_llm_message)
+        ),
     )

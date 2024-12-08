@@ -5,11 +5,11 @@ uvicorn "src.app_module:http_server" --host "0.0.0.0" --port "8080" --reload
 ```
 # 정렬
 
-poetry run black app/                                                                                                     
-poetry run pyright app/
-poetry run isort app/
-poetry run flake8 app/
-poetry run refurb app/
+poetry run black src/                                                                                                     
+poetry run pyright src/
+poetry run isort src/
+poetry run flake8 src/
+poetry run refurb src/
 
 ## 문제점 및 트러블 슈팅
 - 기존에 질문만 임베딩 하려 했으나, 답변도 함께 임베딩 해야함

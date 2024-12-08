@@ -9,6 +9,7 @@ settings = get_settings()
 MILVUS_HOST, MILVUS_PORT = settings.MILVUS_HOST, settings.MILVUS_PORT
 client = MilvusClient("./data/milvus/db/demo.db")
 
+
 @Injectable
 class MilvusSearchClient:
     def __init__(self):
