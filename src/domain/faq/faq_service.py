@@ -1,3 +1,5 @@
+import json
+
 from nest.core import Injectable
 from pymilvus import Hits
 
@@ -30,7 +32,7 @@ class FaqService:
         stream_data = []
         for chunk in chat_stream_generator(response_stream):
             stream_data.append(chunk)
-            yield chunk  # Yield stream data in real-time
+            yield chunk
 
         self._update_question_history("test", question_text_embedding, question, "".join(stream_data))
 
@@ -39,19 +41,20 @@ class FaqService:
         ranked_faq_list = self.faq_repository.search_faq(
             [question_text_embedding],
             top_k=3,
-            search_param={},
-            output_fields=["faq_index", "answer"],
+            search_param={"metric_type": "IP", "params": {"nprobe": 10}},
+            output_fields=["faq_index","question","answer"],
             anns_field="embedding",
+            expr=None,
         )
-
         grouped_faq_list = self._group_faqs_by_index(ranked_faq_list)
-        faqs = "\n".join(str(answer) for answer in self._extract_answers(grouped_faq_list))
+        faqs = "\n".join(json.dumps(answer, ensure_ascii=False) for answer in self._extract_answers_question(grouped_faq_list))
 
         made_prompt = get_question_prompt(
             question=question,
             question_history=[],  # Placeholder for question history
             search_data=faqs,
         )
+        print(made_prompt)
         return made_prompt, question_text_embedding
 
     def _group_faqs_by_index(self, ranked_faq_list: list[Hits]) -> dict:
@@ -61,9 +64,9 @@ class FaqService:
             grouped_faq_list.setdefault(faq_index, []).append(faq)
         return grouped_faq_list
 
-    def _extract_answers(self, grouped_faq_list: dict) -> list[dict]:
+    def _extract_answers_question(self, grouped_faq_list: dict) -> list[dict]:
         return [
-            {"faq_index": faq_index, "answer": faqs[0].entity.answer}
+            {"faq_index": faq_index, "answer": faqs[0].entity.answer, "question": faqs[0].entity.question}
             for faq_index, faqs in grouped_faq_list.items()
         ]
 
