@@ -17,14 +17,12 @@ class FaqSearchRepository:
         search_param: dict[str, str],
         output_fields: list[str],
         anns_field: str,
-        expr,
     ):
         return self.milvus_client.get_client().search(
             collection_name=self.collection_name,
             data=vectors,
             limit=top_k,
-            param=search_param,
+            search_params=search_param,
             output_fields=output_fields,
             anns_field=anns_field,
-            expression=expr,
         )

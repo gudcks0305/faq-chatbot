@@ -40,7 +40,6 @@ class FaqService:
             search_param={"metric_type": "IP", "params": {"nprobe": 10}},
             output_fields=["faq_index","question","answer"],
             anns_field="embedding",
-            expr=None,
         )
         grouped_faq_list = self._group_faqs_by_index(ranked_faq_list)
         faqs = "\n".join(json.dumps(answer, ensure_ascii=False) for answer in self._extract_answers_question(grouped_faq_list))
@@ -55,13 +54,13 @@ class FaqService:
     def _group_faqs_by_index(self, ranked_faq_list: list[Hits]) -> dict:
         grouped_faq_list = {}
         for faq in ranked_faq_list[0]:
-            faq_index = faq.entity.faq_index
+            faq_index = faq["entity"]["faq_index"]
             grouped_faq_list.setdefault(faq_index, []).append(faq)
         return grouped_faq_list
 
     def _extract_answers_question(self, grouped_faq_list: dict) -> list[dict]:
         return [
-            {"faq_index": faq_index, "answer": faqs[0].entity.answer, "question": faqs[0].entity.question}
+            {"faq_index": faq_index, "answer": faqs[0]["entity"]["answer"], "question": faqs[0]["entity"]["question"]}
             for faq_index, faqs in grouped_faq_list.items()
         ]
 
