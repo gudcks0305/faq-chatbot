@@ -3,13 +3,6 @@ from nest.core import Injectable
 from src.domain.milvus.milvus_search_client import MilvusSearchClient
 
 
-# def define_collection_schema():
-#     fields = [
-#         FieldSchema(name="faq_id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-#         FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1536),
-#         FieldSchema(name="faq", dtype=DataType.JSON),
-#     ]
-#     return CollectionSchema(fields, description="FAQ collection")
 @Injectable
 class FaqSearchRepository:
     def __init__(self, milvus_client: MilvusSearchClient):
@@ -29,7 +22,7 @@ class FaqSearchRepository:
             collection_name=self.collection_name,
             data=vectors,
             limit=top_k,
-            param=search_param,
+            search_params=search_param,
             output_fields=output_fields,
             anns_field=anns_field,
         )

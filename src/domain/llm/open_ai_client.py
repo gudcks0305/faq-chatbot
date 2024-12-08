@@ -25,7 +25,9 @@ async def chat_stream_generator_async(stream):
             continue
         yield chunk_content
 
+
 settings = get_settings()
+
 
 @Injectable
 class OpenAIClient:
@@ -51,9 +53,7 @@ class OpenAIClient:
             .embedding
         )
 
-    def request_chat_completion(
-        self, model: str = "gpt-4o-mini", question: str = ""
-    ):
+    def request_chat_completion(self, model: str = "gpt-4o-mini", question: str = ""):
         return self.get_client().chat.completions.create(
             model=model, messages=[{"role": "user", "content": question}], temperature=0
         )
@@ -66,6 +66,7 @@ class OpenAIClient:
             messages=[{"role": "user", "content": question}],
             stream=True,
             temperature=0,
+            top_p=0.2,
         )
 
     def request_chat_completions_stream(

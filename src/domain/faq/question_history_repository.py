@@ -32,3 +32,20 @@ class QuestionHistoryRepository:
 
     def clear_history(self, user_id: str):
         self.history[user_id] = []
+
+    def generate_llm_history_message_by_user_id(
+        self, user_id: str, limit: int = 10
+    ) -> list[dict]:
+        return [
+            {
+                "content": history.question,
+                "role": history.role,
+            }
+            for history in self.history.get(user_id, [])[::-1][:limit]
+        ]
+
+    def get_last_answer_by_user_id(self, user_id: str) -> str:
+        history = self.history.get(user_id, [])
+        for history in history[::-1]:
+            if history.role == "assistant":
+                return history.question
