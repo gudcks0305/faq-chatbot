@@ -48,10 +48,13 @@ class FaqService:
         )
         grouped_faq_list = self._group_faqs_by_index(ranked_faq_list)
         faqs = "\n".join(json.dumps(answer, ensure_ascii=False) for answer in self._extract_answers_question(grouped_faq_list))
-
+        question_history_list_dict_str = "\n".join(
+            json.dumps(history, ensure_ascii=False)
+            for history in self.question_history_repository.get_history_dict_by_user_id("test")
+        )
         made_prompt = get_question_prompt(
             question=question,
-            question_history=[],  # Placeholder for question history
+            question_history=question_history_list_dict_str,
             search_data=faqs,
         )
         print(made_prompt)

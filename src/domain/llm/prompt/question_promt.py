@@ -49,7 +49,7 @@ question_prompt = """
 
 
 def get_question_prompt(
-    question: str, question_history: list[str], search_data: str
+    question: str, question_history: list[str] | str, search_data: str
 ) -> str:
     return question_prompt.format(
         question=question, search_data=search_data, question_history=question_history
