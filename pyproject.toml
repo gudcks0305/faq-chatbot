@@ -16,6 +16,7 @@ jupyter = "^1.1.1"
 pymilvus = "^2.4.6"
 grpcio = ">=1.49.1,<=1.67.1"
 python-dotenv = "^1.0.1"
+pynest-api = "^0.3.1"
 
 
 [build-system]
