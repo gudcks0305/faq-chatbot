@@ -36,3 +36,40 @@ poetry run refurb src/
 - 또는 이전 질/답을 함께 텍스트 임베딩 하는 것도 괜찮은 방법으로 보이나 해당 문제도 토큰 길이 문제가 발생함 그러나 생각보다 길지 않아 보임 많이 길어질 경우 텍스트 요약 모델을 사용하는 것이 좋아보임
 - 문제로 이전 답변 내용과 다른 질문을 한 경우 연관성이 떨어질 수 있음 이경우 이전 답변의 텍스트 임베딩 또한 함께 사용하여 연관성을 높히는 방법이 필요해 보임
 - 상기 기법으로 이전 답변에 종속적인 답변을 제공 하게됨 -> LLM 히스토리 요청 방식을 변경 
+
+## 프로젝트 구조 
+```
+src/
+├── __init__.py
+├── app_controller.py
+├── app_module.py
+├── app_service.py
+├── config/
+│   ├── __init__.py
+│   └── env_variable.py
+└── domain/
+    ├── __init__.py
+    ├── base/
+    │   ├── __init__.py
+    │   └── pydantic_base.py
+    ├── faq/
+    │   ├── __init__.py
+    │   ├── faq_controller.py
+    │   ├── faq_module.py
+    │   ├── faq_search_repository.py
+    │   ├── faq_service.py
+    │   ├── question.py
+    │   └── question_history_repository.py
+    ├── llm/
+    │   ├── __init__.py
+    │   ├── open_ai_client.py
+    │   ├── open_ai_module.py
+    │   └── prompt/
+    │       ├── __init__.py
+    │       └── question_promt.py
+    └── milvus/
+        ├── __init__.py
+        ├── milvus_module.py
+        └── milvus_search_client.py
+
+```
