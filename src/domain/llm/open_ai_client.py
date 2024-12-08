@@ -59,11 +59,11 @@ class OpenAIClient:
         )
 
     def request_chat_completion_stream(
-        self, model: str = "gpt-4o-mini", question: str = "", history: list[dict] = []
+        self, model: str = "gpt-4o-mini", question: str = ""
     ) -> Stream[ChatCompletionChunk]:
         return self.get_client().chat.completions.create(
             model=model,
-            messages=[*history,{"role": "user", "content": question}],
+            messages=[{"role": "user", "content": question}],
             stream=True,
             temperature=0,
             top_p=0.2,

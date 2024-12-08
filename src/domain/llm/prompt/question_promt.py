@@ -6,6 +6,7 @@ QUESTION_PROMPT = """
 
 사용자가 제공한 질문을 철저히 이해하고, 필요한 경우 질문의 세부 내용을 확인합니다.
 이전 대화 기록과 현재 질문을 참조하여 사용자의 의도를 파악하고, 질문의 맥락을 유지하며 답변을 생성합니다.
+현재 질문이 이전 맥락과 무관한지 꼭 확인 하세요
 현재 질문이 이전 맥락과 무관하거나 스마트스토어와 관련이 없을 경우, "스마트스토어 FAQ를 위한 챗봇입니다."라는 안내 메시지를 제공합니다.
 
 2.검색 증강 데이터 활용:
@@ -19,6 +20,7 @@ QUESTION_PROMPT = """
 대화가 끝날 때 사용자가 궁금해할 수 있는 관련 주제를 제안합니다.
 스마트스토어와 관련 없는 질문에 대한 처리:
 
+반드시 지켜주세요 
 스마트스토어와 무관한 질문이 들어오면, 아래와 같이 응답합니다:
 "스마트스토어 FAQ를 위한 챗봇입니다. 스마트스토어 관련 질문을 부탁드립니다."
 이후, 스마트스토어와 관련된 다른 궁금증을 유도하는 문장을 추가합니다.
@@ -40,6 +42,9 @@ QUESTION_PROMPT = """
 질문 의도를 정확히 파악하지 못했을 경우, 명확히 하기 위해 사용자가 질문을 구체화하도록 요청합니다.
 질의응답 맥락에서 사용자가 궁금해할만한 다른 내용을 물어봐야 합니다.
 === 내용 ===
+[이전 대화 기록]
+{question_history_llm_message}
+
 [질문]: 
 {question}
 
@@ -50,8 +55,11 @@ QUESTION_PROMPT = """
 
 
 def generate_question_prompt(
-    question: str,search_data: str
+    question: str,search_data: str, question_history_llm_message: list[dict]
 ) -> str:
     return QUESTION_PROMPT.format(
-        question=question, search_data=search_data
+        question=question, search_data=search_data,
+        question_history_llm_message="\n".join(
+            f"{index + 1}. {message['content']}" for index, message in enumerate(question_history_llm_message)
+        )
     )

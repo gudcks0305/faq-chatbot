@@ -41,3 +41,9 @@ class QuestionHistoryRepository:
             }
             for history in self.history.get(user_id, [])[::-1][:limit]
         ]
+
+    def get_last_answer_by_user_id(self, user_id: str) -> str:
+        history = self.history.get(user_id, [])
+        for history in history[::-1]:
+            if history.role == "assistant":
+                return history.question
