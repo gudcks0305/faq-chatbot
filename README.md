@@ -1,7 +1,7 @@
 # 로컬 실행 
 
 ```bash
-uvicorn main:app --reload
+uvicorn "src.app_module:http_server" --host "0.0.0.0" --port "8080" --reload
 ```
 # 정렬 
 
