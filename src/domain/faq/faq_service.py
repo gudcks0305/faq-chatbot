@@ -36,8 +36,8 @@ class FaqService:
         question_text_embedding = self.openai_client.get_text_text_embedding_small_vectors(question)
         ranked_faq_list = self.faq_repository.search_faq(
             [question_text_embedding],
-            top_k=3,
-            search_param={"metric_type": "IP", "params": {"nprobe": 10}},
+            top_k=5,
+            search_param={"metric_type": "IP", "params": {"nprobe": 15}},
             output_fields=["faq_index","question","answer"],
             anns_field="embedding",
         )

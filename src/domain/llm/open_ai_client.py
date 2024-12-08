@@ -66,6 +66,7 @@ class OpenAIClient:
             messages=[*history,{"role": "user", "content": question}],
             stream=True,
             temperature=0,
+            top_p=0.2,
         )
 
     def request_chat_completions_stream(
