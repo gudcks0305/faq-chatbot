@@ -33,12 +33,11 @@ class QuestionHistoryRepository:
     def clear_history(self, user_id: str):
         self.history[user_id] = []
 
-    def get_history_dict_by_user_id(self, user_id: str) -> list[dict]:
+    def generate_llm_history_message_by_user_id(self, user_id: str,limit:int=10) -> list[dict]:
         return [
             {
-                "user_id": history.user_id,
-                "question": history.question,
+                "content": history.question,
                 "role": history.role,
             }
-            for history in self.history.get(user_id, [])
+            for history in self.history.get(user_id, [])[::-1][:limit]
         ]

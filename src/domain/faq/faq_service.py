@@ -6,7 +6,7 @@ from pymilvus import Hits
 from src.domain.faq.faq_search_repository import FaqSearchRepository
 from src.domain.faq.question_history_repository import QuestionHistoryRepository
 from src.domain.llm.open_ai_client import OpenAIClient, chat_stream_generator
-from src.domain.llm.prompt.question_promt import get_question_prompt
+from src.domain.llm.prompt.question_promt import generate_question_prompt
 
 
 @Injectable
@@ -21,13 +21,9 @@ class FaqService:
         self.openai_client = openai_client
         self.question_history_repository = question_history_repository
 
-    def chat_request(self, question: str):
-        made_prompt, _ = self._prepare_prompt_and_embedding(question)
-        return self.openai_client.request_chat_completion(question=made_prompt)
-
     def chat_request_stream(self, question: str):
-        made_prompt, question_text_embedding = self._prepare_prompt_and_embedding(question)
-        response_stream = self.openai_client.request_chat_completion_stream(question=made_prompt)
+        made_prompt, question_text_embedding, history_llm_faq_message = self._prepare_prompt_and_embedding(question)
+        response_stream = self.openai_client.request_chat_completion_stream(question=made_prompt, history=history_llm_faq_message)
 
         stream_data = []
         for chunk in chat_stream_generator(response_stream):
@@ -36,7 +32,7 @@ class FaqService:
 
         self._update_question_history("test", question_text_embedding, question, "".join(stream_data))
 
-    def _prepare_prompt_and_embedding(self, question: str) -> tuple[str, list[float]]:
+    def _prepare_prompt_and_embedding(self, question: str) -> tuple[str, list[float], list[dict]]:
         question_text_embedding = self.openai_client.get_text_text_embedding_small_vectors(question)
         ranked_faq_list = self.faq_repository.search_faq(
             [question_text_embedding],
@@ -48,17 +44,13 @@ class FaqService:
         )
         grouped_faq_list = self._group_faqs_by_index(ranked_faq_list)
         faqs = "\n".join(json.dumps(answer, ensure_ascii=False) for answer in self._extract_answers_question(grouped_faq_list))
-        question_history_list_dict_str = "\n".join(
-            json.dumps(history, ensure_ascii=False)
-            for history in self.question_history_repository.get_history_dict_by_user_id("test")
-        )
-        made_prompt = get_question_prompt(
+        question_history_llm_message = self.question_history_repository.generate_llm_history_message_by_user_id("test", limit=5)
+
+        made_prompt = generate_question_prompt(
             question=question,
-            question_history=question_history_list_dict_str,
             search_data=faqs,
         )
-        print(made_prompt)
-        return made_prompt, question_text_embedding
+        return made_prompt, question_text_embedding, question_history_llm_message
 
     def _group_faqs_by_index(self, ranked_faq_list: list[Hits]) -> dict:
         grouped_faq_list = {}

@@ -10,10 +10,6 @@ class FaqController:
     def __init__(self, service: FaqService):
         self.service = service
 
-    @Post("/question/")
-    def post_question(self, question_request: QuestionRequest):
-        return self.service.chat_request(question_request.question)
-
     @Post("/question/stream")
     def post_question_stream(self, question_request: QuestionRequest):
         stream = self.service.chat_request_stream(question_request.question)
